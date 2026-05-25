@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#bde4ff" />
+<title>יש לי הפתעה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    font-family: 'Heebo', system-ui, -apple-system, sans-serif;
+  }
+  body {
+    background:
+      radial-gradient(circle at 20% 10%, #ffd6e8 0%, transparent 40%),
+      radial-gradient(circle at 80% 90%, #bde4ff 0%, transparent 45%),
+      linear-gradient(160deg, #eaf6ff 0%, #fff6fb 50%, #fffaf0 100%);
+    color: #2b3a55;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    position: relative;
+  }
+
+  /* Floating background bubbles for some life */
+  .bg-bubble {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.45;
+    filter: blur(2px);
+    animation: float 9s ease-in-out infinite;
+    z-index: 0;
+  }
+  .bg-bubble.b1 { width: 80px; height: 80px; background: #ffd1dc; top: 8%; left: 6%; }
+  .bg-bubble.b2 { width: 120px; height: 120px; background: #c5e8ff; bottom: 10%; right: 4%; animation-delay: 1.5s; }
+  .bg-bubble.b3 { width: 60px; height: 60px; background: #fff3b0; top: 20%; right: 12%; animation-delay: 3s; }
+  .bg-bubble.b4 { width: 90px; height: 90px; background: #d1c4ff; bottom: 25%; left: 10%; animation-delay: 4.5s; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-22px) translateX(10px); }
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    z-index: 2;
+  }
+
+  h1.title {
+    font-family: 'Pacifico', 'Heebo', cursive;
+    font-weight: 900;
+    font-size: clamp(34px, 9vw, 54px);
+    text-align: center;
+    line-height: 1.1;
+    background: linear-gradient(90deg, #ff6fa8, #6fa8ff, #6fdcc0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.6);
+    letter-spacing: 0.5px;
+    padding: 0 6px;
+  }
+
+  .subtitle {
+    font-size: clamp(14px, 3.6vw, 16px);
+    color: #5b6b8a;
+    text-align: center;
+    margin-top: -8px;
+    opacity: 0.9;
+  }
+
+  .card-shell {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-width: 420px;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow:
+      0 24px 50px -18px rgba(80, 60, 120, 0.35),
+      0 8px 16px -10px rgba(80, 60, 120, 0.25),
+      inset 0 0 0 1px rgba(255,255,255,0.6);
+    background: #fff;
+    isolation: isolate;
+  }
+
+  /* The "prize" content that sits underneath the scratch surface */
+  .reveal {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 18px;
+    text-align: center;
+    background:
+      radial-gradient(ellipse at top, #fff7d6 0%, transparent 60%),
+      linear-gradient(180deg, #ffeaf3 0%, #e6f3ff 100%);
+    gap: 14px;
+  }
+
+  .reveal .photo {
+    width: 78%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow:
+      0 12px 28px -10px rgba(60, 80, 130, 0.45),
+      inset 0 0 0 6px #ffffff,
+      inset 0 0 0 8px #ffd1dc;
+    /* Default placeholder image (baby boy themed soft pattern). Replace REPLACE_IMAGE_URL below to use your own. */
+    background-image: var(--reveal-image, url("https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=900&q=80"));
+  }
+
+  .reveal h2 {
+    font-family: 'Pacifico', 'Heebo', cursive;
+    font-size: clamp(24px, 6.5vw, 32px);
+    color: #2b3a55;
+    line-height: 1.2;
+  }
+
+  .reveal p {
+    font-size: clamp(14px, 4vw, 17px);
+    color: #4a5876;
+    max-width: 90%;
+    line-height: 1.5;
+  }
+
+  .reveal .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(90deg, #ffd1dc, #bde4ff);
+    color: #2b3a55;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 4px 10px -4px rgba(80, 60, 120, 0.35);
+  }
+
+  /* The scratch canvas sits on top */
+  .scratch-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+    z-index: 3;
+    transition: opacity 0.6s ease;
+  }
+  .scratch-canvas:active { cursor: grabbing; }
+  .scratch-canvas.gone { opacity: 0; pointer-events: none; }
+
+  /* Hint label on top of scratch card */
+  .hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    pointer-events: none;
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    transition: opacity 0.4s ease;
+  }
+  .hint .finger {
+    font-size: clamp(40px, 12vw, 56px);
+    display: block;
+    animation: rub 1.4s ease-in-out infinite;
+  }
+  .hint .text {
+    margin-top: 6px;
+    font-size: clamp(15px, 4.2vw, 18px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .hint.hidden { opacity: 0; }
+  @keyframes rub {
+    0%, 100% { transform: translateX(0) rotate(-10deg); }
+    50% { transform: translateX(18px) rotate(10deg); }
+  }
+
+  .progress-pill {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #2b3a55;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px -4px rgba(0,0,0,0.2);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .progress-pill.hidden { opacity: 0; }
+
+  .reset-btn {
+    margin-top: 4px;
+    border: none;
+    background: linear-gradient(90deg, #ff8fb5, #8fb5ff);
+    color: white;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 18px -8px rgba(80, 60, 120, 0.45);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .reset-btn.visible { opacity: 1; pointer-events: auto; }
+  .reset-btn:active { transform: scale(0.96); }
+
+  /* Confetti canvas covers full viewport */
+  .confetti-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media (max-height: 640px) {
+    .card-shell { aspect-ratio: 5 / 6; max-width: 320px; }
+    .wrap { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-bubble b1"></div>
+<div class="bg-bubble b2"></div>
+<div class="bg-bubble b3"></div>
+<div class="bg-bubble b4"></div>
+
+<div class="wrap">
+  <h1 class="title">יש לי הפתעה</h1>
+  <p class="subtitle">גרדו את הכרטיס כדי לגלות מה מסתתר מאחור ✨</p>
+
+  <div class="card-shell" id="cardShell">
+    <!-- Hidden prize content -->
+    <div class="reveal" id="reveal">
+      <span class="badge">מזל טוב!</span>
+      <div class="photo" id="photo" aria-label="תמונת הפתעה"></div>
+      <h2>נולד לנו בן! 💙</h2>
+      <p>בשעה טובה ומוצלחת — שיגדל לתורה, לחופה ולמעשים טובים</p>
+    </div>
+
+    <!-- Hint that appears over the scratch surface -->
+    <div class="hint" id="hint">
+      <span class="finger">👆</span>
+      <span class="text">גרדו כאן באצבע</span>
+    </div>
+
+    <div class="progress-pill" id="progressPill">0%</div>
+
+    <!-- Scratch surface -->
+    <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+  </div>
+
+  <button class="reset-btn" id="resetBtn" type="button">גירוד נוסף 🎉</button>
+</div>
+
+<canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // CONFIG — to swap the hidden image, set IMAGE_URL below
+  // (use any direct image URL — jpg / png / webp)
+  // Leave as null to use the default Unsplash baby photo.
+  // ============================================================
+  const IMAGE_URL = null;
+
+  if (IMAGE_URL) {
+    document.documentElement.style.setProperty('--reveal-image', `url("${IMAGE_URL}")`);
+  }
+
+  const cardShell = document.getElementById('cardShell');
+  const canvas = document.getElementById('scratchCanvas');
+  const ctx = canvas.getContext('2d');
+  const hint = document.getElementById('hint');
+  const progressPill = document.getElementById('progressPill');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let isDrawing = false;
+  let revealed = false;
+  let lastPoint = null;
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  function paintScratchSurface() {
+    const rect = cardShell.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+
+    // Metallic foil-like surface
+    const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    g.addColorStop(0, '#c9d4e2');
+    g.addColorStop(0.45, '#8fa1b8');
+    g.addColorStop(0.5, '#b6c4d4');
+    g.addColorStop(0.55, '#8fa1b8');
+    g.addColorStop(1, '#c9d4e2');
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Subtle sparkle dots
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    for (let i = 0; i < 80; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const r = Math.random() * 1.6 * dpr + 0.5 * dpr;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Diagonal shimmer band
+    const band = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    band.addColorStop(0, 'rgba(255,255,255,0)');
+    band.addColorStop(0.45, 'rgba(255,255,255,0.18)');
+    band.addColorStop(0.5, 'rgba(255,255,255,0.45)');
+    band.addColorStop(0.55, 'rgba(255,255,255,0.18)');
+    band.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = band;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Big playful prompt baked into the surface
+    ctx.fillStyle = 'rgba(43, 58, 85, 0.55)';
+    ctx.font = `700 ${Math.round(28 * dpr)}px Heebo, system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('גרד כדי לגלות', canvas.width / 2, canvas.height / 2 - 24 * dpr);
+    ctx.font = `400 ${Math.round(16 * dpr)}px Heebo, system-ui, sans-serif`;
+    ctx.fillText('הפתעה מחכה לך', canvas.width / 2, canvas.height / 2 + 14 * dpr);
+  }
+
+  function getPointerPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * dpr;
+    const y = (e.clientY - rect.top) * dpr;
+    return { x, y };
+  }
+
+  function scratchAt(p) {
+    ctx.globalCompositeOperation = 'destination-out';
+    const radius = Math.max(canvas.width, canvas.height) * 0.06;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (lastPoint) {
+      ctx.lineWidth = radius * 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(lastPoint.x, lastPoint.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+    }
+    lastPoint = p;
+  }
+
+  function pointerDown(e) {
+    if (revealed) return;
+    e.preventDefault();
+    isDrawing = true;
+    lastPoint = null;
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+    hint.classList.add('hidden');
+    scratchAt(getPointerPos(e));
+  }
+  function pointerMove(e) {
+    if (!isDrawing || revealed) return;
+    e.preventDefault();
+    scratchAt(getPointerPos(e));
+    scheduleProgress();
+  }
+  function pointerUp(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    lastPoint = null;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    scheduleProgress(true);
+  }
+
+  // Throttled progress check
+  let progressScheduled = false;
+  function scheduleProgress(force) {
+    if (progressScheduled && !force) return;
+    progressScheduled = true;
+    requestAnimationFrame(() => {
+      progressScheduled = false;
+      const pct = computeCleared();
+      progressPill.textContent = pct + '%';
+      if (pct >= 55 && !revealed) {
+        revealAll();
+      }
+    });
+  }
+
+  function computeCleared() {
+    // Sample a downscaled grid for speed
+    const sample = 50;
+    const sx = Math.max(1, Math.floor(canvas.width / sample));
+    const sy = Math.max(1, Math.floor(canvas.height / sample));
+    let cleared = 0;
+    let total = 0;
+    try {
+      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = img.data;
+      for (let y = 0; y < canvas.height; y += sy) {
+        for (let x = 0; x < canvas.width; x += sx) {
+          const idx = (y * canvas.width + x) * 4 + 3; // alpha channel
+          total++;
+          if (data[idx] < 32) cleared++;
+        }
+      }
+    } catch (err) {
+      return 0;
+    }
+    return Math.round((cleared / total) * 100);
+  }
+
+  function revealAll() {
+    revealed = true;
+    canvas.classList.add('gone');
+    progressPill.classList.add('hidden');
+    hint.classList.add('hidden');
+    resetBtn.classList.add('visible');
+    fireConfetti();
+    if (navigator.vibrate) {
+      try { navigator.vibrate([20, 40, 80]); } catch (e) {}
+    }
+  }
+
+  function resetCard() {
+    revealed = false;
+    canvas.classList.remove('gone');
+    progressPill.classList.remove('hidden');
+    progressPill.textContent = '0%';
+    hint.classList.remove('hidden');
+    resetBtn.classList.remove('visible');
+    paintScratchSurface();
+  }
+
+  // Event listeners — Pointer Events cover mouse + touch + pen
+  canvas.addEventListener('pointerdown', pointerDown);
+  canvas.addEventListener('pointermove', pointerMove);
+  canvas.addEventListener('pointerup', pointerUp);
+  canvas.addEventListener('pointercancel', pointerUp);
+  canvas.addEventListener('pointerleave', pointerUp);
+
+  resetBtn.addEventListener('click', resetCard);
+
+  // Hide hint after first interaction even before threshold
+  canvas.addEventListener('pointerdown', () => hint.classList.add('hidden'), { once: true });
+
+  // Resize handling — re-paint surface only if not yet revealed
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      dpr = Math.max(1, window.devicePixelRatio || 1);
+      if (!revealed) paintScratchSurface();
+    }, 150);
+  });
+
+  // Initial paint after layout settles
+  requestAnimationFrame(paintScratchSurface);
+
+  // ============================================================
+  // Confetti — lightweight self-contained particle system
+  // ============================================================
+  const conf = document.getElementById('confettiCanvas');
+  const cctx = conf.getContext('2d');
+  let confettiParticles = [];
+  let confettiRunning = false;
+
+  function resizeConfetti() {
+    conf.width = window.innerWidth * dpr;
+    conf.height = window.innerHeight * dpr;
+    conf.style.width = window.innerWidth + 'px';
+    conf.style.height = window.innerHeight + 'px';
+  }
+  resizeConfetti();
+  window.addEventListener('resize', resizeConfetti);
+
+  const COLORS = ['#ff6fa8', '#6fa8ff', '#6fdcc0', '#ffd166', '#c084fc', '#ff8fb5', '#7ed6df', '#ffe066'];
+
+  function spawnBurst(originX, originY, count) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (Math.random() * 12 + 4) * dpr;
+      confettiParticles.push({
+        x: originX,
+        y: originY,
+        vx: Math.cos(angle) * speed * (0.6 + Math.random() * 0.6),
+        vy: Math.sin(angle) * speed * (0.6 + Math.random() * 0.6) - 6 * dpr,
+        g: 0.35 * dpr,
+        size: (Math.random() * 8 + 4) * dpr,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.3,
+        life: 0,
+        maxLife: 180 + Math.random() * 80,
+        shape: Math.random() < 0.5 ? 'rect' : 'circ',
+      });
+    }
+  }
+
+  function fireConfetti() {
+    const rect = cardShell.getBoundingClientRect();
+    const cx = (rect.left + rect.width / 2) * dpr;
+    const cy = (rect.top + rect.height / 2) * dpr;
+    spawnBurst(cx, cy, 140);
+    spawnBurst(rect.left * dpr, (rect.top + rect.height) * dpr, 60);
+    spawnBurst((rect.left + rect.width) * dpr, (rect.top + rect.height) * dpr, 60);
+
+    // Couple of follow-up bursts for drama
+    setTimeout(() => spawnBurst(window.innerWidth * 0.2 * dpr, window.innerHeight * 0.3 * dpr, 80), 350);
+    setTimeout(() => spawnBurst(window.innerWidth * 0.8 * dpr, window.innerHeight * 0.3 * dpr, 80), 600);
+
+    if (!confettiRunning) {
+      confettiRunning = true;
+      requestAnimationFrame(renderConfetti);
+    }
+  }
+
+  function renderConfetti() {
+    cctx.clearRect(0, 0, conf.width, conf.height);
+    for (let i = confettiParticles.length - 1; i >= 0; i--) {
+      const p = confettiParticles[i];
+      p.vy += p.g;
+      p.vx *= 0.99;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.life++;
+
+      const alpha = Math.max(0, 1 - p.life / p.maxLife);
+      cctx.globalAlpha = alpha;
+      cctx.fillStyle = p.color;
+      cctx.save();
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot);
+      if (p.shape === 'rect') {
+        cctx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size / 1.5);
+      } else {
+        cctx.beginPath();
+        cctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+        cctx.fill();
+      }
+      cctx.restore();
+
+      if (p.life >= p.maxLife || p.y > conf.height + 60 * dpr) {
+        confettiParticles.splice(i, 1);
+      }
+    }
+    cctx.globalAlpha = 1;
+
+    if (confettiParticles.length > 0) {
+      requestAnimationFrame(renderConfetti);
+    } else {
+      confettiRunning = false;
+      cctx.clearRect(0, 0, conf.width, conf.height);
+    }
+  }
+
+  // Prevent double-tap zoom on iOS while interacting with the card
+  cardShell.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+})();
+</script>
+</body>
+</html>
