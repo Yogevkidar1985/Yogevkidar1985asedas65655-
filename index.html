@@ -24,7 +24,7 @@
     background-attachment: fixed;
     color: #2b3a55;
     min-height: 100dvh;
-    padding: 14px 12px 20px;
+    padding: 10px 10px 12px;
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
@@ -53,15 +53,15 @@
     width: 100%;
     max-width: 460px;
     margin: 0 auto;
-    min-height: calc(100dvh - 34px);
+    min-height: calc(100dvh - 22px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     position: relative;
     z-index: 2;
-    padding-bottom: 4px;
+    padding-bottom: 2px;
   }
 
   /* Footer credit centered at the bottom of the page */
@@ -385,25 +385,40 @@
   }
 
   /* Compact mode for shorter viewports so everything fits without
-     scrolling: tighter gaps, smaller paddings, smaller secondary UI */
-  @media (max-height: 780px) {
-    .wrap { gap: 10px; }
-    .title-wrap { padding: 9px 22px 7px; }
-    .subtitle { font-size: 13px; padding: 3px 11px; margin-top: -2px; }
-    .reset-btn { padding: 11px 26px; font-size: 15px; }
-    .page-footer { padding: 8px 0 2px; }
-    .page-footer img { height: 34px; }
-    .page-footer .credit { font-size: 13px; }
-  }
-  @media (max-height: 680px) {
-    .wrap { gap: 8px; }
-    .title-wrap { padding: 7px 18px 5px; }
-    h1.title { font-size: clamp(28px, 7vw, 40px); }
-    .subtitle { font-size: 12px; padding: 2px 10px; }
-    .reset-btn { padding: 9px 22px; font-size: 14px; }
+     scrolling: tighter gaps, smaller paddings, smaller secondary UI.
+     Card max-width tightens further so the 3:4 height never exceeds
+     what the viewport can show. */
+  @media (max-height: 820px) {
+    .wrap { gap: 7px; padding-bottom: 0; }
+    .title-wrap { padding: 8px 20px 6px; }
+    h1.title { font-size: clamp(28px, 7.5vw, 42px); }
+    .subtitle { font-size: 13px; margin-top: -1px; padding: 1px 4px; }
+    .reset-btn { padding: 10px 22px; font-size: 15px; }
+    .page-footer { padding: 4px 0 0; }
     .page-footer img { height: 30px; }
     .page-footer .credit { font-size: 12px; }
-    .card-shell { max-width: min(420px, 42dvh); }
+  }
+  @media (max-height: 720px) {
+    .wrap { gap: 6px; }
+    .title-wrap { padding: 6px 16px 4px; }
+    h1.title { font-size: clamp(24px, 6.8vw, 36px); }
+    .subtitle { font-size: 12px; }
+    .reset-btn { padding: 8px 20px; font-size: 14px; }
+    .page-footer { padding: 2px 0 0; gap: 2px; }
+    .page-footer img { height: 26px; }
+    .page-footer .credit { font-size: 11px; }
+    .card-shell { max-width: min(420px, 45dvh); }
+  }
+  @media (max-height: 620px) {
+    .wrap { gap: 4px; }
+    .title-wrap { padding: 4px 14px 3px; border-width: 2px; }
+    h1.title { font-size: clamp(22px, 6.2vw, 32px); }
+    .subtitle { font-size: 11px; }
+    .title-deco { font-size: clamp(14px, 3.8vw, 18px); }
+    .reset-btn { padding: 7px 18px; font-size: 13px; }
+    .page-footer img { height: 22px; }
+    .page-footer .credit { font-size: 10px; }
+    .card-shell { max-width: min(360px, 44dvh); }
   }
 
   /* =============================================================
@@ -527,7 +542,11 @@
     /* Cap the card by viewport height too — the card is 3:4 portrait,
        so limiting its WIDTH by a fraction of dvh keeps the HEIGHT
        within bounds even on short phones */
-    max-width: min(460px, 58dvh);
+    /* Constrain by viewport HEIGHT — the card is portrait 3:4, so capping
+       its WIDTH at a fraction of dvh also caps its HEIGHT. 48dvh width
+       means 64dvh height, leaving ~36dvh for title + subtitle + reset
+       button + footer + gaps, which fits even on iPhone SE. */
+    max-width: min(460px, 48dvh);
     width: 100%;
     perspective: 1500px;
     background: transparent;
