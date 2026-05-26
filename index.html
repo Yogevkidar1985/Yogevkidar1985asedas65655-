@@ -7,7 +7,7 @@
 <title>יש לי הפתעה</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&family=Pacifico&family=Caveat:wght@400;500;700&family=Suez+One&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -362,6 +362,320 @@
     .card-shell { aspect-ratio: 5 / 6; max-width: 320px; }
     .wrap { gap: 12px; }
   }
+
+  /* =============================================================
+     Title wrap with floating decorations
+     ============================================================= */
+  .title-wrap {
+    position: relative;
+    padding: 18px 30px 14px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .title-deco {
+    position: absolute;
+    font-size: clamp(22px, 5.5vw, 30px);
+    pointer-events: none;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.18));
+    animation: floatDeco 3.4s ease-in-out infinite;
+    will-change: transform;
+  }
+  .title-deco.d1 { top: -2px;  right: 6%;   animation-delay: 0s; }
+  .title-deco.d2 { top: 18%;   left: 4%;    animation-delay: 0.5s; }
+  .title-deco.d3 { bottom: 0;  right: 2%;   animation-delay: 1.0s; }
+  .title-deco.d4 { bottom: 6%; left: 8%;    animation-delay: 1.5s; }
+  .title-deco.d5 { top: 32%;   right: 26%;  animation-delay: 0.8s;
+                   font-size: clamp(16px, 4vw, 22px); }
+  .title-deco.d6 { bottom: 22%;left: 30%;   animation-delay: 1.3s;
+                   font-size: clamp(16px, 4vw, 22px); }
+  @keyframes floatDeco {
+    0%, 100% { transform: translateY(0) rotate(-10deg) scale(1);   opacity: 0.85; }
+    50%      { transform: translateY(-12px) rotate(10deg) scale(1.12); opacity: 1; }
+  }
+
+  /* =============================================================
+     3D flip — card has front and back faces
+     ============================================================= */
+  .card-area {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .card-shell {
+    perspective: 1500px;
+    background: transparent;
+    box-shadow: none;       /* shadow moved to faces */
+    overflow: visible;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.95s cubic-bezier(0.45, 0.05, 0.2, 1);
+  }
+  .card-shell.flipped .card-inner { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow:
+      0 24px 50px -18px rgba(80, 60, 120, 0.35),
+      0 8px 16px -10px rgba(80, 60, 120, 0.25),
+      inset 0 0 0 1px rgba(255,255,255,0.6);
+  }
+  .card-back { transform: rotateY(180deg); }
+
+  /* Tap-to-flip hint on the front, after reveal */
+  .card-front.flip-ready { cursor: pointer; }
+  .flip-hint {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 30, 60, 0.78);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: clamp(12px, 3.4vw, 14px);
+    font-weight: 700;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    white-space: nowrap;
+  }
+  .flip-hint.visible { opacity: 1; animation: flipHintBob 1.6s ease-in-out infinite; }
+  @keyframes flipHintBob {
+    0%, 100% { transform: translate(-50%, 0); }
+    50%      { transform: translate(-50%, -5px); }
+  }
+
+  /* =============================================================
+     Card BACK — blessing area
+     ============================================================= */
+  .back-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(160deg, #e6f3ff 0%, #cce7ff 100%);
+    transition: background 0.4s ease;
+  }
+  .back-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 14px 12px;
+    gap: 8px;
+  }
+  .back-title {
+    text-align: center;
+    font-family: 'Pacifico', 'Heebo', cursive;
+    font-size: clamp(20px, 5.5vw, 26px);
+    color: #1a2e5c;
+    text-shadow:
+      -1px 0 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, 0 1px 0 #fff,
+      0 2px 4px rgba(0,0,0,0.15);
+    margin: 2px 0 4px;
+    font-weight: 700;
+  }
+  .blessing-area {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: rgba(255,255,255,0.6);
+    border-radius: 12px;
+    font-family: 'Caveat', 'Pacifico', 'Heebo', cursive;
+    font-size: clamp(22px, 6.2vw, 30px);
+    color: #1a1a2e;
+    resize: none;
+    outline: none;
+    line-height: 1.4;
+    text-align: center;
+    padding: 14px 12px;
+    direction: rtl;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.7),
+      inset 0 2px 6px rgba(0,0,0,0.05);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .blessing-area::placeholder {
+    color: rgba(40, 50, 80, 0.45);
+    font-style: italic;
+  }
+  .blessing-area:focus {
+    box-shadow:
+      inset 0 0 0 2px rgba(194, 24, 91, 0.5),
+      inset 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .back-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0 0;
+  }
+  .save-indicator {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1b5e20;
+    background: rgba(255,255,255,0.92);
+    padding: 5px 10px;
+    border-radius: 999px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    box-shadow: 0 2px 6px -2px rgba(0,0,0,0.15);
+    white-space: nowrap;
+  }
+  .save-indicator.visible { opacity: 1; }
+  .share-btn, .flip-back-btn {
+    border: none;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px -4px rgba(0,0,0,0.28);
+    transition: transform 0.15s ease, filter 0.2s ease;
+    white-space: nowrap;
+  }
+  .share-btn {
+    background: linear-gradient(90deg, #5fbfff, #8295ff);
+    color: white;
+  }
+  .flip-back-btn {
+    background: rgba(255,255,255,0.92);
+    color: #2b3a55;
+  }
+  .share-btn:active, .flip-back-btn:active { transform: scale(0.95); }
+  .share-btn:hover { filter: brightness(1.1); }
+
+  /* =============================================================
+     Background picker (right side, visible when flipped)
+     ============================================================= */
+  .bg-picker {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%) translateX(30px);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 7px;
+    background: rgba(255,255,255,0.92);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px -6px rgba(0,0,0,0.22);
+    max-height: 86%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 8;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    scrollbar-width: thin;
+  }
+  .bg-picker.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
+  }
+  .bg-picker::-webkit-scrollbar { width: 4px; }
+  .bg-picker::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+
+  .bg-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    padding: 0;
+  }
+  .bg-thumb:hover { transform: scale(1.08); }
+  .bg-thumb.active {
+    border-color: #c2185b;
+    box-shadow: 0 0 0 1px #fff, 0 4px 8px -3px rgba(194,24,91,0.5);
+  }
+
+  @media (min-width: 520px) {
+    .bg-picker { right: -54px; }
+    .bg-thumb { width: 40px; height: 40px; }
+  }
+
+  /* =============================================================
+     Roulette ticker below the card
+     ============================================================= */
+  .roulette {
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #fff3f9 100%);
+    border-radius: 14px;
+    padding: 10px 0;
+    box-shadow:
+      0 4px 14px -6px rgba(0,0,0,0.18),
+      inset 0 0 0 1px rgba(255,255,255,0.7);
+    position: relative;
+    margin-top: 6px;
+  }
+  .roulette::before,
+  .roulette::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 38px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .roulette::before { left: 0;  background: linear-gradient(90deg,  #fff 0%, transparent 100%); }
+  .roulette::after  { right: 0; background: linear-gradient(-90deg, #fff 0%, transparent 100%); }
+
+  .roulette-track {
+    display: flex;
+    gap: 26px;
+    white-space: nowrap;
+    width: max-content;
+    animation: rouletteScroll 32s linear infinite;
+    align-items: center;
+    padding: 0 12px;
+  }
+  .roulette-track span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Heebo', sans-serif;
+    font-weight: 700;
+    font-size: clamp(15px, 4.2vw, 18px);
+    color: #2b3a55;
+  }
+  .roulette-track .emoji {
+    font-size: clamp(20px, 5.5vw, 24px);
+  }
+  @keyframes rouletteScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 </style>
 </head>
 <body>
@@ -372,30 +686,79 @@
 <div class="bg-bubble b4"></div>
 
 <div class="wrap">
-  <h1 class="title">יש לי הפתעה</h1>
+  <div class="title-wrap">
+    <span class="title-deco d1">🎁</span>
+    <span class="title-deco d2">⭐</span>
+    <span class="title-deco d3">💙</span>
+    <span class="title-deco d4">🎈</span>
+    <span class="title-deco d5">✨</span>
+    <span class="title-deco d6">🎉</span>
+    <h1 class="title">יש לי הפתעה</h1>
+  </div>
   <p class="subtitle">גרדו את הכרטיס בעדינות עם האצבע ✨</p>
 
-  <div class="card-shell" id="cardShell">
-    <!-- Hidden prize content -->
-    <div class="reveal" id="reveal">
-      <span class="badge">מזל טוב!</span>
-      <div class="photo" id="photo" aria-label="תמונת הפתעה"></div>
-      <h2>יש לנו בן! 💙</h2>
-      <p>בשעה טובה ומוצלחת — שיגדל לתורה, לחופה ולמעשים טובים</p>
+  <div class="card-area" id="cardArea">
+    <div class="card-shell" id="cardShell">
+      <div class="card-inner" id="cardInner">
+
+        <!-- ============ FRONT ============ -->
+        <div class="card-face card-front" id="cardFront">
+          <!-- Hidden prize content -->
+          <div class="reveal" id="reveal">
+            <span class="badge">מזל טוב!</span>
+            <div class="photo" id="photo" aria-label="תמונת הפתעה"></div>
+            <h2>יש לנו בן! 💙</h2>
+            <p>בשעה טובה ומוצלחת — שיגדל לתורה, לחופה ולמעשים טובים</p>
+          </div>
+
+          <!-- Hint that appears over the scratch surface -->
+          <div class="hint" id="hint">
+            <span class="finger">👆</span>
+          </div>
+
+          <div class="progress-pill" id="progressPill">0%</div>
+
+          <!-- Scratch surface -->
+          <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+
+          <!-- Tap-to-flip hint, shown after reveal -->
+          <div class="flip-hint" id="flipHint">
+            <span>👆</span> הקישו על התמונה לכתיבת ברכה
+          </div>
+        </div>
+
+        <!-- ============ BACK ============ -->
+        <div class="card-face card-back" id="cardBack">
+          <div class="back-bg" id="backBg"></div>
+          <div class="back-content">
+            <h3 class="back-title">✍️ ברכה אישית</h3>
+            <textarea
+              class="blessing-area"
+              id="blessingArea"
+              dir="rtl"
+              maxlength="500"
+              placeholder="כתבו כאן ברכה אישית להולדת הבן..."></textarea>
+            <div class="back-controls">
+              <span class="save-indicator" id="saveIndicator">נשמר ✓</span>
+              <button class="share-btn" id="shareBtn" type="button">📤 שיתוף הברכה</button>
+              <button class="flip-back-btn" id="flipBackBtn" type="button">↻ חזרה לכרטיס</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
-    <!-- Hint that appears over the scratch surface -->
-    <div class="hint" id="hint">
-      <span class="finger">👆</span>
-    </div>
-
-    <div class="progress-pill" id="progressPill">0%</div>
-
-    <!-- Scratch surface -->
-    <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+    <!-- Background picker shown when the card is flipped -->
+    <div class="bg-picker" id="bgPicker" aria-label="בחירת רקע"></div>
   </div>
 
   <button class="reset-btn" id="resetBtn" type="button">🎰 גירוד נוסף 🎰</button>
+
+  <!-- Roulette / marquee of blessings -->
+  <div class="roulette" aria-hidden="true">
+    <div class="roulette-track" id="rouletteTrack"></div>
+  </div>
 </div>
 
 <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
@@ -747,7 +1110,7 @@
 
   // Minimum scratching duration before reveal can fire (feels like a real card)
   const MIN_SCRATCH_SECONDS = 5;
-  const REVEAL_THRESHOLD_PCT = 90;
+  const REVEAL_THRESHOLD_PCT = 75;
   let scratchStartTime = null;
 
   function scratchAt(p) {
@@ -881,12 +1244,17 @@
     hint.classList.add('hidden');
     resetBtn.classList.add('visible');
     fireConfetti();
+    enableFlipOnReveal();
     if (navigator.vibrate) {
       try { navigator.vibrate([20, 40, 80]); } catch (e) {}
     }
   }
 
   function resetCard() {
+    // If we're on the back face, flip to front first
+    if (cardShell.classList.contains('flipped')) {
+      flipToFront();
+    }
     revealed = false;
     scratchStartTime = null;
     canvas.classList.remove('gone');
@@ -894,6 +1262,8 @@
     progressPill.textContent = '0%';
     hint.classList.remove('hidden');
     resetBtn.classList.remove('visible');
+    flipHint.classList.remove('visible');
+    cardFront.classList.remove('flip-ready');
     paintScratchSurface();
   }
 
@@ -1019,6 +1389,238 @@
       cctx.clearRect(0, 0, conf.width, conf.height);
     }
   }
+
+  // ============================================================
+  // Card flip + blessing back face
+  // ============================================================
+  const cardInner = document.getElementById('cardInner');
+  const cardFront = document.getElementById('cardFront');
+  const flipHint = document.getElementById('flipHint');
+  const reveal = document.getElementById('reveal');
+  const blessingArea = document.getElementById('blessingArea');
+  const saveIndicator = document.getElementById('saveIndicator');
+  const shareBtn = document.getElementById('shareBtn');
+  const flipBackBtn = document.getElementById('flipBackBtn');
+  const bgPicker = document.getElementById('bgPicker');
+  const backBg = document.getElementById('backBg');
+
+  // Available back-card backgrounds — soft baby-themed gradients/patterns
+  const BACKGROUNDS = [
+    { id: 'blue',    css: 'linear-gradient(160deg, #d6ecff 0%, #a8d3f5 100%)' },
+    { id: 'pink',    css: 'linear-gradient(160deg, #ffe1ec 0%, #ffc2d6 100%)' },
+    { id: 'mint',    css: 'linear-gradient(160deg, #d6f5e3 0%, #a8e8c4 100%)' },
+    { id: 'sunset',  css: 'linear-gradient(160deg, #fff3b0 0%, #ffc8a8 100%)' },
+    { id: 'lilac',   css: 'linear-gradient(160deg, #ece1ff 0%, #c8b8ff 100%)' },
+    { id: 'cream',   css: 'linear-gradient(160deg, #fff7e0 0%, #ffd9a8 100%)' },
+    { id: 'mintsky', css: 'linear-gradient(160deg, #d8f5ec 0%, #b8e0ff 100%)' },
+    { id: 'peach',   css: 'linear-gradient(160deg, #ffe5d6 0%, #ffb8a8 100%)' },
+    { id: 'stars',   css: 'radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 50%),'
+                        + 'radial-gradient(1.5px 1.5px at 60% 20%, #fff 50%, transparent 50%),'
+                        + 'radial-gradient(2px 2px at 80% 60%, #fff 50%, transparent 50%),'
+                        + 'radial-gradient(1px 1px at 35% 70%, #fff 50%, transparent 50%),'
+                        + 'radial-gradient(1.5px 1.5px at 75% 85%, #fff 50%, transparent 50%),'
+                        + 'linear-gradient(180deg, #2a4a82 0%, #4a78b8 100%)' },
+    { id: 'hearts',  css: 'radial-gradient(circle at 22% 28%, #ff8fa3 6%, transparent 7%),'
+                        + 'radial-gradient(circle at 72% 64%, #ffb6c8 6%, transparent 7%),'
+                        + 'radial-gradient(circle at 50% 90%, #ffd1dc 6%, transparent 7%),'
+                        + 'linear-gradient(160deg, #fff0f5, #ffe6ed)' },
+    { id: 'clouds',  css: 'radial-gradient(ellipse at 25% 35%, #ffffff 18%, transparent 22%),'
+                        + 'radial-gradient(ellipse at 70% 25%, #ffffff 14%, transparent 18%),'
+                        + 'radial-gradient(ellipse at 55% 75%, #ffffff 18%, transparent 22%),'
+                        + 'linear-gradient(180deg, #bde4ff 0%, #d9eeff 100%)' },
+    { id: 'confetti',css: 'radial-gradient(circle at 15% 20%, #ff6fa8 3%, transparent 4%),'
+                        + 'radial-gradient(circle at 80% 35%, #6fa8ff 3%, transparent 4%),'
+                        + 'radial-gradient(circle at 35% 70%, #6fdcc0 3%, transparent 4%),'
+                        + 'radial-gradient(circle at 90% 80%, #ffd166 3%, transparent 4%),'
+                        + 'radial-gradient(circle at 55% 45%, #c084fc 3%, transparent 4%),'
+                        + 'linear-gradient(160deg, #fffaf0, #fff0f5)' },
+  ];
+
+  let currentBgId = BACKGROUNDS[0].id;
+
+  function applyBackground(bg, persist) {
+    currentBgId = bg.id;
+    backBg.style.background = bg.css;
+    document.querySelectorAll('.bg-thumb').forEach((t) => {
+      t.classList.toggle('active', t.dataset.id === bg.id);
+    });
+    if (persist) {
+      try { localStorage.setItem('blessingBg', bg.id); } catch (e) {}
+    }
+  }
+
+  // Build the picker thumbnails
+  BACKGROUNDS.forEach((bg) => {
+    const t = document.createElement('button');
+    t.type = 'button';
+    t.className = 'bg-thumb';
+    t.dataset.id = bg.id;
+    t.style.background = bg.css;
+    t.setAttribute('aria-label', 'רקע ' + bg.id);
+    t.addEventListener('click', () => applyBackground(bg, true));
+    bgPicker.appendChild(t);
+  });
+
+  function flipToBack() {
+    cardShell.classList.add('flipped');
+    bgPicker.classList.add('visible');
+    flipHint.classList.remove('visible');
+    // Focus the textarea after the flip animation completes
+    setTimeout(() => {
+      try { blessingArea.focus({ preventScroll: true }); } catch (e) {}
+    }, 700);
+  }
+  function flipToFront() {
+    cardShell.classList.remove('flipped');
+    bgPicker.classList.remove('visible');
+    try { blessingArea.blur(); } catch (e) {}
+  }
+
+  let flipArmed = false;
+  function enableFlipOnReveal() {
+    flipHint.classList.add('visible');
+    cardFront.classList.add('flip-ready');
+    flipArmed = true;
+  }
+  // The reveal element sits underneath the (now transparent) canvas. After
+  // reveal, a tap on the front face flips the card.
+  cardFront.addEventListener('click', (e) => {
+    if (!flipArmed || cardShell.classList.contains('flipped')) return;
+    // Don't flip if the user is interacting with the canvas during a fresh scratch
+    if (!revealed) return;
+    flipToBack();
+  });
+
+  flipBackBtn.addEventListener('click', flipToFront);
+
+  // ============================================================
+  // Blessing area — auto save + share link
+  // ============================================================
+  let saveTimer = null;
+  let savedFlashTimer = null;
+  function flashSaved(text) {
+    if (text) saveIndicator.textContent = text;
+    saveIndicator.classList.add('visible');
+    clearTimeout(savedFlashTimer);
+    savedFlashTimer = setTimeout(() => {
+      saveIndicator.classList.remove('visible');
+      saveIndicator.textContent = 'נשמר ✓';
+    }, 1800);
+  }
+
+  blessingArea.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try { localStorage.setItem('blessingText', blessingArea.value); } catch (e) {}
+      flashSaved('נשמר ✓');
+    }, 600);
+  });
+
+  // Base64 helpers that handle UTF-8 (Hebrew) safely
+  function encodeText(s) {
+    return btoa(String.fromCharCode.apply(null,
+      new TextEncoder().encode(s)));
+  }
+  function decodeText(s) {
+    try {
+      const bin = atob(s);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder().decode(bytes);
+    } catch (e) { return ''; }
+  }
+
+  function buildShareUrl() {
+    const text = blessingArea.value.trim();
+    const params = new URLSearchParams();
+    if (text) params.set('b', encodeText(text));
+    if (currentBgId) params.set('bg', currentBgId);
+    const base = location.origin + location.pathname;
+    return base + '#' + params.toString();
+  }
+
+  shareBtn.addEventListener('click', async () => {
+    const url = buildShareUrl();
+    const shareText = blessingArea.value.trim() || 'יש לי הפתעה בשבילך 🎁';
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'יש לי הפתעה', text: shareText, url });
+        return;
+      } catch (e) { /* user cancelled — fall through to clipboard */ }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      flashSaved('הלינק הועתק 📋');
+    } catch (e) {
+      window.prompt('העתיקו את הלינק:', url);
+    }
+  });
+
+  // Load from URL hash (if shared) OR from local storage
+  function loadInitialState() {
+    let loadedFromUrl = false;
+    if (location.hash && location.hash.length > 1) {
+      const params = new URLSearchParams(location.hash.substring(1));
+      const b = params.get('b');
+      const bg = params.get('bg');
+      if (b) {
+        blessingArea.value = decodeText(b);
+        loadedFromUrl = true;
+      }
+      if (bg) {
+        const found = BACKGROUNDS.find((x) => x.id === bg);
+        if (found) applyBackground(found, false);
+      }
+    }
+    if (!loadedFromUrl) {
+      try {
+        const saved = localStorage.getItem('blessingText');
+        if (saved) blessingArea.value = saved;
+      } catch (e) {}
+      try {
+        const savedBg = localStorage.getItem('blessingBg');
+        const found = BACKGROUNDS.find((x) => x.id === savedBg);
+        applyBackground(found || BACKGROUNDS[0], false);
+      } catch (e) {
+        applyBackground(BACKGROUNDS[0], false);
+      }
+    } else {
+      // Showing someone's shared blessing — flip straight to the back
+      setTimeout(() => {
+        revealed = true;
+        canvas.classList.add('gone');
+        flipArmed = true;
+        flipToBack();
+      }, 400);
+    }
+  }
+  loadInitialState();
+
+  // ============================================================
+  // Roulette — bottom marquee with baby-blessing items
+  // ============================================================
+  const ROULETTE_ITEMS = [
+    ['🍼', 'ברוך הבא'],
+    ['👶', 'מזל טוב'],
+    ['💙', 'בן יקר'],
+    ['🎈', 'שמחה רבה'],
+    ['🎉', 'לחיים'],
+    ['🌟', 'אור גדול'],
+    ['🎁', 'בריאות שלמה'],
+    ['🎊', 'בשורות טובות'],
+    ['🕊️', 'שלום ושמחה'],
+    ['👼', 'מלאך קטן'],
+    ['💫', 'הצלחה'],
+    ['🥳', 'איזה כיף'],
+  ];
+  const rouletteTrack = document.getElementById('rouletteTrack');
+  function buildRoulette() {
+    // Duplicate twice so the -50% translateX loop is seamless
+    const html = ROULETTE_ITEMS.map(([e, t]) =>
+      `<span><span class="emoji">${e}</span>${t}</span>`).join('');
+    rouletteTrack.innerHTML = html + html;
+  }
+  buildRoulette();
 
   // Prevent double-tap zoom on iOS while interacting with the card
   cardShell.addEventListener('touchstart', (e) => {
