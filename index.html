@@ -383,13 +383,38 @@
     z-index: 10;
   }
 
-  @media (max-height: 640px) {
-    .card-shell { aspect-ratio: 5 / 6; max-width: 320px; }
-    .wrap { gap: 12px; }
+  /* Compact mode for shorter viewports so everything fits without
+     scrolling: tighter gaps, smaller paddings, smaller secondary UI */
+  @media (max-height: 780px) {
+    .wrap { gap: 10px; }
+    .title-wrap { padding: 9px 22px 7px; }
+    .subtitle { font-size: 13px; padding: 3px 11px; margin-top: -2px; }
+    .reset-btn { padding: 11px 26px; font-size: 15px; }
+    .roulette { padding: 7px 0; margin-top: 2px; }
+    .roulette-track { gap: 22px; }
+    .roulette-track span { font-size: 14px; }
+    .roulette-track .emoji { font-size: 18px; }
+    .page-footer { padding: 8px 0 2px; }
+    .page-footer img { height: 26px; }
+    .page-footer .credit { font-size: 10px; }
+  }
+  @media (max-height: 680px) {
+    .wrap { gap: 8px; }
+    .title-wrap { padding: 7px 18px 5px; }
+    h1.title { font-size: clamp(28px, 7vw, 40px); }
+    .subtitle { font-size: 12px; padding: 2px 10px; }
+    .reset-btn { padding: 9px 22px; font-size: 14px; }
+    .roulette { padding: 5px 0; }
+    .roulette-track span { font-size: 13px; }
+    .roulette-track .emoji { font-size: 16px; }
+    .page-footer img { height: 22px; }
+    .card-shell { max-width: min(420px, 42dvh); }
   }
 
   /* =============================================================
      Title wrap with floating decorations + animated gold border
+     Uses background-clip on border-box for the gold ring so the
+     inside of the wrap is fully transparent (no white line).
      ============================================================= */
   @property --goldAngle {
     syntax: '<angle>';
@@ -398,99 +423,64 @@
   }
   .title-wrap {
     position: relative;
-    padding: 18px 36px 14px;
+    padding: 12px 28px 10px;
     display: flex;
     justify-content: center;
     width: auto;
-    max-width: 92%;
+    max-width: 94%;
     margin: 2px auto 0;
     border-radius: 22px;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    border: 3px solid transparent;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)) padding-box,
+      conic-gradient(from var(--goldAngle, 0deg),
+        #8c5e08 0%,  #ffd700 6%,  #fff5a8 10%, #ffd700 14%, #8c5e08 24%,
+        #ffd700 36%, #fff5a8 42%, #ffd700 48%, #8c5e08 60%,
+        #ffd700 72%, #fff5a8 78%, #ffd700 84%, #8c5e08 96%, #ffd700 100%) border-box;
+    animation: goldSpin 3.6s linear infinite;
     box-shadow:
-      0 0 18px rgba(255, 200, 50, 0.45),
-      0 0 36px rgba(255, 150, 30, 0.25),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+      0 0 14px rgba(255, 200, 50, 0.55),
+      0 0 28px rgba(255, 170, 40, 0.28);
     isolation: isolate;
-  }
-  /* Animated gold "running lights" border using conic-gradient + mask */
-  .title-wrap::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 3px;
-    background: conic-gradient(from var(--goldAngle, 0deg),
-      #8c5e08 0%, #ffd700 5%, #fff5a8 9%, #ffd700 13%, #8c5e08 22%,
-      #ffd700 35%, #fff5a8 42%, #ffd700 48%, #8c5e08 58%,
-      #ffd700 72%, #fff5a8 78%, #ffd700 84%, #8c5e08 95%, #ffd700 100%);
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    animation: goldSpin 3.2s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-    filter: drop-shadow(0 0 6px rgba(255, 200, 50, 0.65));
   }
   @keyframes goldSpin {
     to { --goldAngle: 360deg; }
   }
-  /* Fallback animation for browsers without @property — animate position */
+  /* Fallback for browsers without @property — static gold ring with a
+     glow pulse instead of rotation */
   @supports not (background: paint(--x)) {
-    .title-wrap::before {
+    .title-wrap {
+      animation: titleGlowPulse 1.8s ease-in-out infinite alternate;
       background:
-        linear-gradient(90deg,
-          #8c5e08 0%, #ffd700 14%, #fff5a8 22%, #ffd700 30%,
-          #8c5e08 45%, #ffd700 62%, #fff5a8 70%, #ffd700 78%,
-          #8c5e08 95%, #ffd700 100%);
-      background-size: 300% 100%;
-      animation: goldShift 3.2s linear infinite;
+        linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)) padding-box,
+        linear-gradient(90deg, #b8860b, #ffd700, #fff5a8, #ffd700, #b8860b) border-box;
     }
-    @keyframes goldShift {
-      to { background-position: 300% 0%; }
+    @keyframes titleGlowPulse {
+      from { box-shadow: 0 0 10px rgba(255,200,50,0.4),  0 0 22px rgba(255,170,40,0.2); }
+      to   { box-shadow: 0 0 18px rgba(255,220,80,0.7),  0 0 36px rgba(255,170,40,0.35); }
     }
-  }
-  /* Bulb lights at the four corners that blink */
-  .title-wrap::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
-    background:
-      radial-gradient(circle at 8px 8px, #fff9c4 2.5px, rgba(255, 215, 0, 0.6) 4px, transparent 5px),
-      radial-gradient(circle at calc(100% - 8px) 8px, #fff9c4 2.5px, rgba(255, 215, 0, 0.6) 4px, transparent 5px),
-      radial-gradient(circle at 8px calc(100% - 8px), #fff9c4 2.5px, rgba(255, 215, 0, 0.6) 4px, transparent 5px),
-      radial-gradient(circle at calc(100% - 8px) calc(100% - 8px), #fff9c4 2.5px, rgba(255, 215, 0, 0.6) 4px, transparent 5px);
-    animation: cornerBulbs 1.1s ease-in-out infinite alternate;
-    pointer-events: none;
-    z-index: 1;
-  }
-  @keyframes cornerBulbs {
-    0%, 100% { filter: brightness(1) drop-shadow(0 0 3px rgba(255, 215, 0, 0.7)); }
-    50%      { filter: brightness(1.6) drop-shadow(0 0 8px rgba(255, 240, 130, 1)); }
   }
   .title-deco {
     position: absolute;
-    font-size: clamp(22px, 5.5vw, 30px);
+    font-size: clamp(18px, 4.6vw, 24px);
     pointer-events: none;
-    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.18));
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
     animation: floatDeco 3.4s ease-in-out infinite;
     will-change: transform;
+    z-index: -1;
   }
-  .title-deco.d1 { top: -2px;  right: 6%;   animation-delay: 0s; }
-  .title-deco.d2 { top: 18%;   left: 4%;    animation-delay: 0.5s; }
-  .title-deco.d3 { bottom: 0;  right: 2%;   animation-delay: 1.0s; }
-  .title-deco.d4 { bottom: 6%; left: 8%;    animation-delay: 1.5s; }
-  .title-deco.d5 { top: 32%;   right: 26%;  animation-delay: 0.8s;
-                   font-size: clamp(16px, 4vw, 22px); }
-  .title-deco.d6 { bottom: 22%;left: 30%;   animation-delay: 1.3s;
-                   font-size: clamp(16px, 4vw, 22px); }
+  /* All decorations sit OUTSIDE the title pill so they can't overlap the
+     letters during their bobbing animation */
+  .title-deco.d1 { top: -16px;    right: -6px;  animation-delay: 0s; }
+  .title-deco.d2 { top: -10px;    left:  -6px;  animation-delay: 0.5s; }
+  .title-deco.d3 { bottom: -16px; right: -6px;  animation-delay: 1.0s; }
+  .title-deco.d4 { bottom: -10px; left:  -6px;  animation-delay: 1.5s; }
+  /* d5 and d6 are hidden — they were rendering above the title text */
+  .title-deco.d5,
+  .title-deco.d6 { display: none; }
   @keyframes floatDeco {
-    0%, 100% { transform: translateY(0) rotate(-10deg) scale(1);   opacity: 0.85; }
-    50%      { transform: translateY(-12px) rotate(10deg) scale(1.12); opacity: 1; }
+    0%, 100% { transform: translateY(0)    rotate(-10deg) scale(1);    opacity: 0.85; }
+    50%      { transform: translateY(-8px) rotate(10deg)  scale(1.1);  opacity: 1; }
   }
 
   /* =============================================================
@@ -513,7 +503,10 @@
     direction: rtl;
     flex: 1 1 auto;
     min-width: 0;
-    max-width: 420px;
+    /* Cap the card by viewport height too — the card is 3:4 portrait,
+       so limiting its WIDTH by a fraction of dvh keeps the HEIGHT
+       within bounds even on short phones */
+    max-width: min(420px, 46dvh);
     width: 100%;
     perspective: 1500px;
     background: transparent;
