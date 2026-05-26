@@ -534,7 +534,7 @@
     /* Cap the card by viewport height too — the card is 3:4 portrait,
        so limiting its WIDTH by a fraction of dvh keeps the HEIGHT
        within bounds even on short phones */
-    max-width: min(440px, 52dvh);
+    max-width: min(460px, 58dvh);
     width: 100%;
     perspective: 1500px;
     background: transparent;
@@ -983,11 +983,6 @@
 
   <button class="reset-btn" id="resetBtn" type="button">🎰 גירוד נוסף 🎰</button>
 
-  <!-- Roulette / marquee of blessings -->
-  <div class="roulette" aria-hidden="true">
-    <div class="roulette-track" id="rouletteTrack"></div>
-  </div>
-
   <!-- Footer credit -->
   <footer class="page-footer">
     <img src="IMG_5138.png" alt="לוגו" />
@@ -1057,9 +1052,11 @@
   // Initial state — pick first image if already cached
   setScratchImage(0);
 
-  // Draw an image with "object-fit: cover" semantics into the given rectangle.
-  // Also trims ~3.5% from each side, which crops out the gray margin baked
-  // into the source Chishgad scan so the design fills the card edge-to-edge.
+  // Draw an image with "object-fit: cover" semantics into the given
+  // rectangle. The top of the source image is anchored to the top of the
+  // canvas (instead of vertically centering) so the card's header text
+  // ("ניתן לזכות עד...") is never clipped. A small side trim removes the
+  // gray margin baked into the scan.
   function drawImageCover(img, dx, dy, dw, dh) {
     const ir = img.naturalWidth / img.naturalHeight;
     const br = dw / dh;
@@ -1073,13 +1070,12 @@
       sw = img.naturalWidth;
       sh = sw / br;
       sx = 0;
-      sy = (img.naturalHeight - sh) / 2;
+      sy = 0;
     }
-    const trim = 0.035;
-    sx += sw * trim;
-    sy += sh * trim;
-    sw *= (1 - 2 * trim);
-    sh *= (1 - 2 * trim);
+    // Side-only trim — keep top fully intact
+    const sideTrim = 0.015;
+    sx += sw * sideTrim;
+    sw *= (1 - 2 * sideTrim);
     ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
   }
 
@@ -1367,7 +1363,7 @@
 
   // Minimum scratching duration before reveal can fire (feels like a real card)
   const MIN_SCRATCH_SECONDS = 5;
-  const REVEAL_THRESHOLD_PCT = 75;
+  const REVEAL_THRESHOLD_PCT = 70;
   let scratchStartTime = null;
 
   function scratchAt(p) {
@@ -1899,32 +1895,6 @@
     }
   }
   loadInitialState();
-
-  // ============================================================
-  // Roulette — bottom marquee with baby-blessing items
-  // ============================================================
-  const ROULETTE_ITEMS = [
-    ['🍼', 'ברוך הבא'],
-    ['👶', 'מזל טוב'],
-    ['💙', 'בן יקר'],
-    ['🎈', 'שמחה רבה'],
-    ['🎉', 'לחיים'],
-    ['🌟', 'אור גדול'],
-    ['🎁', 'בריאות שלמה'],
-    ['🎊', 'בשורות טובות'],
-    ['🕊️', 'שלום ושמחה'],
-    ['👼', 'מלאך קטן'],
-    ['💫', 'הצלחה'],
-    ['🥳', 'איזה כיף'],
-  ];
-  const rouletteTrack = document.getElementById('rouletteTrack');
-  function buildRoulette() {
-    // Duplicate twice so the -50% translateX loop is seamless
-    const html = ROULETTE_ITEMS.map(([e, t]) =>
-      `<span><span class="emoji">${e}</span>${t}</span>`).join('');
-    rouletteTrack.innerHTML = html + html;
-  }
-  buildRoulette();
 
   // Prevent double-tap zoom on iOS while interacting with the card
   cardShell.addEventListener('touchstart', (e) => {
