@@ -460,6 +460,29 @@
       to   { box-shadow: 0 0 18px rgba(255,220,80,0.7),  0 0 36px rgba(255,170,40,0.35); }
     }
   }
+  /* Casino-style bulb lights at the four corners, blinking together */
+  .title-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 10px 10px,
+        #fff9c4 2.5px, rgba(255, 215, 0, 0.7) 4px, transparent 5.5px),
+      radial-gradient(circle at calc(100% - 10px) 10px,
+        #fff9c4 2.5px, rgba(255, 215, 0, 0.7) 4px, transparent 5.5px),
+      radial-gradient(circle at 10px calc(100% - 10px),
+        #fff9c4 2.5px, rgba(255, 215, 0, 0.7) 4px, transparent 5.5px),
+      radial-gradient(circle at calc(100% - 10px) calc(100% - 10px),
+        #fff9c4 2.5px, rgba(255, 215, 0, 0.7) 4px, transparent 5.5px);
+    animation: cornerBulbs 1.1s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: -1;
+  }
+  @keyframes cornerBulbs {
+    0%, 100% { filter: brightness(1)   drop-shadow(0 0 3px rgba(255, 215,  0, 0.7)); }
+    50%      { filter: brightness(1.6) drop-shadow(0 0 8px rgba(255, 240, 130, 1)); }
+  }
   .title-deco {
     position: absolute;
     font-size: clamp(18px, 4.6vw, 24px);
@@ -803,20 +826,17 @@
   }
 
   /* =============================================================
-     Roulette ticker below the card
+     Roulette ticker below the card — transparent, no white strip
      ============================================================= */
   .roulette {
     width: 100%;
     max-width: 460px;
     overflow: hidden;
-    background: linear-gradient(180deg, #ffffff 0%, #fff3f9 100%);
+    background: transparent;
     border-radius: 14px;
-    padding: 10px 0;
-    box-shadow:
-      0 4px 14px -6px rgba(0,0,0,0.18),
-      inset 0 0 0 1px rgba(255,255,255,0.7);
+    padding: 8px 0;
     position: relative;
-    margin-top: 6px;
+    margin-top: 2px;
   }
   .roulette::before,
   .roulette::after {
@@ -824,12 +844,15 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 38px;
+    width: 30px;
     z-index: 2;
     pointer-events: none;
   }
-  .roulette::before { left: 0;  background: linear-gradient(90deg,  #fff 0%, transparent 100%); }
-  .roulette::after  { right: 0; background: linear-gradient(-90deg, #fff 0%, transparent 100%); }
+  /* Soft fade to the page background instead of solid white */
+  .roulette::before { left: 0;
+    background: linear-gradient(90deg, rgba(244,247,253,1) 0%, rgba(244,247,253,0) 100%); }
+  .roulette::after  { right: 0;
+    background: linear-gradient(-90deg, rgba(244,247,253,1) 0%, rgba(244,247,253,0) 100%); }
 
   .roulette-track {
     display: flex;
