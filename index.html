@@ -581,31 +581,44 @@
   }
   .card-back { transform: rotateY(180deg); }
 
-  /* Tap-to-flip hint on the front, after reveal */
+  /* Tap-to-flip hint — free-floating pill below the card. Collapses to
+     zero height when hidden so it doesn't push the layout around. */
   .card-front.flip-ready { cursor: pointer; }
   .flip-hint {
-    position: absolute;
-    bottom: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(20, 30, 60, 0.78);
+    background: rgba(20, 30, 60, 0.85);
     color: #ffffff;
-    padding: 6px 14px;
+    padding: 8px 18px;
     border-radius: 999px;
-    font-size: clamp(12px, 3.2vw, 13px);
+    font-size: clamp(13px, 3.4vw, 15px);
     font-weight: 700;
-    z-index: 4;
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.5s ease;
+    white-space: nowrap;
+    text-align: center;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    white-space: nowrap;
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.35);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      max-height 0.35s ease,
+      padding 0.35s ease,
+      opacity 0.4s ease,
+      margin 0.35s ease;
   }
-  .flip-hint.visible { opacity: 1; animation: flipHintBob 1.6s ease-in-out infinite; }
+  .flip-hint.visible {
+    max-height: 60px;
+    padding: 8px 18px;
+    margin: 4px 0 -2px;
+    opacity: 1;
+    animation: flipHintBob 1.6s ease-in-out infinite;
+  }
   @keyframes flipHintBob {
-    0%, 100% { transform: translate(-50%, 0); }
-    50%      { transform: translate(-50%, -5px); }
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
   }
 
   /* =============================================================
@@ -913,11 +926,6 @@
 
           <!-- Scratch surface -->
           <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
-
-          <!-- Tap-to-flip hint, shown after reveal -->
-          <div class="flip-hint" id="flipHint">
-            <span>👆</span> הקישו על התמונה לכתיבת ברכה
-          </div>
         </div>
 
         <!-- ============ BACK ============ -->
@@ -943,6 +951,12 @@
 
     <!-- Background picker shown when the card is flipped -->
     <div class="bg-picker" id="bgPicker" aria-label="בחירת רקע"></div>
+  </div>
+
+  <!-- Tap-to-flip hint, shown after reveal — sits below the card so
+       it never overlaps the blessing text inside the reveal -->
+  <div class="flip-hint" id="flipHint">
+    <span>👆</span> הקישו על התמונה לכתיבת ברכה
   </div>
 
   <button class="reset-btn" id="resetBtn" type="button">🎰 גירוד נוסף 🎰</button>
