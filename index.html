@@ -172,18 +172,40 @@
   }
 
   .reveal .photo {
-    width: 78%;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
+    width: clamp(180px, 62%, 280px);
+    aspect-ratio: 5 / 4;
+    background-color: #000;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    /* Polaroid / ultrasound printout: white card with thick bottom strip
+       and a dark photo window inside. */
+    border: 10px solid #ffffff;
+    border-bottom-width: 38px;
+    border-radius: 3px;
     box-shadow:
-      0 12px 28px -10px rgba(60, 80, 130, 0.45),
-      inset 0 0 0 6px #ffffff,
-      inset 0 0 0 8px #ffd1dc;
-    /* Default placeholder image (baby boy themed soft pattern). Replace REPLACE_IMAGE_URL below to use your own. */
+      0 18px 36px -10px rgba(60, 80, 130, 0.45),
+      0 6px 14px -6px rgba(0, 0, 0, 0.2),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    transform: rotate(-2deg);
+    /* Default placeholder. Replace REPLACE_IMAGE_URL in the script
+       config below to use your own image. */
     background-image: var(--reveal-image, url("https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=900&q=80"));
+    position: relative;
+  }
+  /* Date stamp on the bottom-white strip — mimics ultrasound printout */
+  .reveal .photo::after {
+    content: 'BABY 💙';
+    position: absolute;
+    bottom: -32px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #444;
+    letter-spacing: 1.5px;
   }
 
   .reveal h2 {
@@ -1009,7 +1031,7 @@
   //   SCRATCH_IMAGE_URLS — list of scratch card surfaces; cycles each
   //                        time the user presses "scratch again"
   // ============================================================
-  const IMAGE_URL = null;
+  const IMAGE_URL = 'IMG_5157.jpeg';
   const SCRATCH_IMAGE_URLS = ['IMG_5133.jpeg', 'IMG_5143.jpeg'];
 
   if (IMAGE_URL) {
