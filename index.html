@@ -65,24 +65,34 @@
   h1.title {
     font-family: 'Pacifico', 'Heebo', cursive;
     font-weight: 900;
-    font-size: clamp(34px, 9vw, 54px);
+    font-size: clamp(36px, 9.5vw, 58px);
     text-align: center;
     line-height: 1.1;
-    background: linear-gradient(90deg, #ff6fa8, #6fa8ff, #6fdcc0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: 0 2px 0 rgba(255,255,255,0.6);
+    color: #c2185b;
+    text-shadow:
+      -2px 0 0 #ffffff,
+      2px 0 0 #ffffff,
+      0 -2px 0 #ffffff,
+      0 2px 0 #ffffff,
+      -2px -2px 0 #ffffff,
+      2px -2px 0 #ffffff,
+      -2px 2px 0 #ffffff,
+      2px 2px 0 #ffffff,
+      0 4px 12px rgba(0, 0, 0, 0.25);
     letter-spacing: 0.5px;
-    padding: 0 6px;
+    padding: 4px 8px;
   }
 
   .subtitle {
-    font-size: clamp(14px, 3.6vw, 16px);
-    color: #5b6b8a;
+    font-size: clamp(15px, 3.8vw, 17px);
+    color: #2b3a55;
     text-align: center;
-    margin-top: -8px;
-    opacity: 0.9;
+    margin-top: -4px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 4px 14px;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px -4px rgba(0,0,0,0.2);
   }
 
   .card-shell {
@@ -158,7 +168,9 @@
     box-shadow: 0 4px 10px -4px rgba(80, 60, 120, 0.35);
   }
 
-  /* The scratch canvas sits on top */
+  /* The scratch canvas sits on top.
+     Its background is a silver/gray foil — when canvas pixels are erased
+     by scratching, that gray "scratched foil" texture shows through. */
   .scratch-canvas {
     position: absolute;
     inset: 0;
@@ -167,7 +179,17 @@
     cursor: grab;
     touch-action: none;
     z-index: 3;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.7s ease;
+    background:
+      radial-gradient(circle at 22% 22%, rgba(255,255,255,0.55) 0%, transparent 38%),
+      radial-gradient(circle at 78% 78%, rgba(255,255,255,0.35) 0%, transparent 42%),
+      linear-gradient(135deg,
+        #babdc2 0%,
+        #8e9197 25%,
+        #c9ccd1 48%,
+        #6f7278 52%,
+        #a4a7ad 75%,
+        #c4c7cc 100%);
   }
   .scratch-canvas:active { cursor: grabbing; }
   .scratch-canvas.gone { opacity: 0; pointer-events: none; }
@@ -637,9 +659,19 @@
     return { x, y };
   }
 
+  // Minimum scratching duration before reveal can fire (feels like a real card)
+  const MIN_SCRATCH_SECONDS = 5;
+  const REVEAL_THRESHOLD_PCT = 75;
+  let scratchStartTime = null;
+
   function scratchAt(p) {
+    // Partial-alpha erasing: each pass only removes ~55% of the remaining
+    // opacity, so the same spot needs ~3 passes to fully clear. This mimics
+    // scratching off real silver foil and stretches the time required.
+    ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
-    const radius = Math.max(canvas.width, canvas.height) * 0.06;
+    ctx.globalAlpha = 0.55;
+    const radius = Math.max(canvas.width, canvas.height) * 0.045;
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
@@ -654,6 +686,7 @@
       ctx.lineTo(p.x, p.y);
       ctx.stroke();
     }
+    ctx.restore();
     lastPoint = p;
   }
 
@@ -662,6 +695,7 @@
     e.preventDefault();
     isDrawing = true;
     lastPoint = null;
+    if (scratchStartTime === null) scratchStartTime = performance.now();
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     hint.classList.add('hidden');
     scratchAt(getPointerPos(e));
@@ -689,7 +723,10 @@
       progressScheduled = false;
       const pct = computeCleared();
       progressPill.textContent = pct + '%';
-      if (pct >= 55 && !revealed) {
+      const elapsedSec = scratchStartTime
+        ? (performance.now() - scratchStartTime) / 1000
+        : 0;
+      if (pct >= REVEAL_THRESHOLD_PCT && elapsedSec >= MIN_SCRATCH_SECONDS && !revealed) {
         revealAll();
       }
     });
@@ -732,6 +769,7 @@
 
   function resetCard() {
     revealed = false;
+    scratchStartTime = null;
     canvas.classList.remove('gone');
     progressPill.classList.remove('hidden');
     progressPill.textContent = '0%';
