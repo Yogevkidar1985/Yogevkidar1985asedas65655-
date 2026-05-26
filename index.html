@@ -170,7 +170,8 @@
 
   /* The scratch canvas sits on top.
      Its background is a silver/gray foil — when canvas pixels are erased
-     by scratching, that gray "scratched foil" texture shows through. */
+     by scratching, that gray "scratched foil" texture shows through.
+     SVG turbulence adds grain to make it look like real metallic foil. */
   .scratch-canvas {
     position: absolute;
     inset: 0;
@@ -181,15 +182,27 @@
     z-index: 3;
     transition: opacity 0.7s ease;
     background:
-      radial-gradient(circle at 22% 22%, rgba(255,255,255,0.55) 0%, transparent 38%),
+      url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' seed='3'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>") repeat,
+      repeating-linear-gradient(135deg,
+        rgba(255,255,255,0.04) 0px,
+        rgba(255,255,255,0.04) 1px,
+        transparent 1px,
+        transparent 4px),
+      repeating-linear-gradient(45deg,
+        rgba(0,0,0,0.05) 0px,
+        rgba(0,0,0,0.05) 1px,
+        transparent 1px,
+        transparent 5px),
+      radial-gradient(circle at 22% 22%, rgba(255,255,255,0.6) 0%, transparent 38%),
       radial-gradient(circle at 78% 78%, rgba(255,255,255,0.35) 0%, transparent 42%),
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,0.08) 0%, transparent 60%),
       linear-gradient(135deg,
-        #babdc2 0%,
-        #8e9197 25%,
-        #c9ccd1 48%,
-        #6f7278 52%,
-        #a4a7ad 75%,
-        #c4c7cc 100%);
+        #b4b7bc 0%,
+        #888b91 25%,
+        #cdd0d4 48%,
+        #6c6f75 52%,
+        #a0a3a9 75%,
+        #c0c3c8 100%);
   }
   .scratch-canvas:active { cursor: grabbing; }
   .scratch-canvas.gone { opacity: 0; pointer-events: none; }
@@ -665,27 +678,60 @@
   let scratchStartTime = null;
 
   function scratchAt(p) {
-    // Partial-alpha erasing: each pass only removes ~55% of the remaining
-    // opacity, so the same spot needs ~3 passes to fully clear. This mimics
-    // scratching off real silver foil and stretches the time required.
+    // Coin-on-foil simulation: a soft press at the contact point, then
+    // several thin parallel "scrape" lines along the motion direction,
+    // plus tiny scattered particles for silver dust. Each individual pass
+    // removes partial alpha so the same spot needs multiple passes to
+    // fully clear — matching the feel of real Chishgad foil.
     ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.globalAlpha = 0.55;
-    const radius = Math.max(canvas.width, canvas.height) * 0.045;
 
+    const baseRadius = Math.max(canvas.width, canvas.height) * 0.04;
+
+    // 1. Soft "coin tip" press at the current point
+    ctx.globalAlpha = 0.42;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, baseRadius * 0.85, 0, Math.PI * 2);
     ctx.fill();
 
+    // 2. Multiple thin scratch streaks along direction of motion
     if (lastPoint) {
-      ctx.lineWidth = radius * 2;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.beginPath();
-      ctx.moveTo(lastPoint.x, lastPoint.y);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
+      const dx = p.x - lastPoint.x;
+      const dy = p.y - lastPoint.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 0.5) {
+        const angle = Math.atan2(dy, dx);
+        const numStreaks = 6;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < numStreaks; i++) {
+          const t = (i / (numStreaks - 1)) - 0.5;
+          const offset = t * baseRadius * 1.9 + (Math.random() - 0.5) * baseRadius * 0.35;
+          const perpX = -Math.sin(angle) * offset;
+          const perpY = Math.cos(angle) * offset;
+          ctx.globalAlpha = 0.25 + Math.random() * 0.4;
+          ctx.lineWidth = baseRadius * (0.07 + Math.random() * 0.2);
+          ctx.beginPath();
+          ctx.moveTo(lastPoint.x + perpX, lastPoint.y + perpY);
+          ctx.lineTo(p.x + perpX, p.y + perpY);
+          ctx.stroke();
+        }
+      }
     }
+
+    // 3. Silver-dust particles scattered around the contact area
+    const debrisCount = 10;
+    for (let i = 0; i < debrisCount; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const d = Math.random() * baseRadius * 1.6;
+      const px = p.x + Math.cos(a) * d;
+      const py = p.y + Math.sin(a) * d;
+      const r = baseRadius * (0.04 + Math.random() * 0.16);
+      ctx.globalAlpha = 0.2 + Math.random() * 0.35;
+      ctx.beginPath();
+      ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     ctx.restore();
     lastPoint = p;
   }
