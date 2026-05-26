@@ -109,15 +109,14 @@
   }
 
   .subtitle {
-    font-size: clamp(15px, 3.8vw, 17px);
+    font-size: clamp(14px, 3.6vw, 16px);
     color: #2b3a55;
     text-align: center;
-    margin-top: -4px;
+    margin-top: -2px;
     font-weight: 700;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 4px 14px;
-    border-radius: 999px;
-    box-shadow: 0 2px 8px -4px rgba(0,0,0,0.2);
+    background: transparent;
+    padding: 2px 4px;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.9);
   }
 
   .card-shell {
@@ -277,8 +276,10 @@
     border-radius: 999px;
     box-shadow: 0 4px 10px -4px rgba(0,0,0,0.2);
     pointer-events: none;
-    transition: opacity 0.4s ease;
+    opacity: 0;
+    transition: opacity 0.35s ease;
   }
+  .progress-pill.active { opacity: 1; }
   .progress-pill.hidden { opacity: 0; }
 
   /* Casino-style "scratch again" button — pulsing gold with shimmer */
@@ -518,11 +519,14 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 0;
     /* Force LTR layout so the card sits on the left and the picker on the
        right when both are visible (children in DOM: card first, picker second) */
     direction: ltr;
+    transition: gap 0.35s ease;
   }
+  /* Add a gap only when the picker is actually open */
+  .card-area:has(.bg-picker.visible) { gap: 8px; }
   .card-shell {
     direction: rtl;
     flex: 1 1 auto;
@@ -1015,7 +1019,9 @@
     scratchImage.src = SCRATCH_IMAGE_URL;
   }
 
-  // Draw an image with "object-fit: cover" semantics into the given rectangle
+  // Draw an image with "object-fit: cover" semantics into the given rectangle.
+  // Also trims ~3.5% from each side, which crops out the gray margin baked
+  // into the source Chishgad scan so the design fills the card edge-to-edge.
   function drawImageCover(img, dx, dy, dw, dh) {
     const ir = img.naturalWidth / img.naturalHeight;
     const br = dw / dh;
@@ -1031,6 +1037,11 @@
       sx = 0;
       sy = (img.naturalHeight - sh) / 2;
     }
+    const trim = 0.035;
+    sx += sw * trim;
+    sy += sh * trim;
+    sw *= (1 - 2 * trim);
+    sh *= (1 - 2 * trim);
     ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
   }
 
@@ -1388,6 +1399,7 @@
     if (scratchStartTime === null) scratchStartTime = performance.now();
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     hint.classList.add('hidden');
+    progressPill.classList.add('active');
     scratchAt(getPointerPos(e));
   }
   function pointerMove(e) {
@@ -1467,6 +1479,7 @@
     scratchStartTime = null;
     canvas.classList.remove('gone');
     progressPill.classList.remove('hidden');
+    progressPill.classList.remove('active');
     progressPill.textContent = '0%';
     hint.classList.remove('hidden');
     resetBtn.classList.remove('visible');
