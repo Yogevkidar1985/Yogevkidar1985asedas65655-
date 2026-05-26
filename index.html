@@ -641,20 +641,37 @@
     border: none;
     background: rgba(255,255,255,0.6);
     border-radius: 12px;
-    font-family: 'Caveat', 'Pacifico', 'Heebo', cursive;
-    font-size: clamp(22px, 6.2vw, 30px);
+    /* Hebrew handwriting fonts: Mishafi (iOS/macOS built-in), then
+       Caveat for Latin chars, with a generic cursive fallback */
+    font-family: 'Mishafi', 'Mishafi Gold', 'SignPainter', 'Bradley Hand',
+                 'Caveat', 'Pacifico', cursive;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(24px, 6.6vw, 32px);
     color: #1a1a2e;
     resize: none;
     outline: none;
-    line-height: 1.4;
+    line-height: 1.5;
     text-align: center;
-    padding: 14px 12px;
+    padding: 16px 14px;
     direction: rtl;
+    letter-spacing: 0.3px;
     box-shadow:
       inset 0 0 0 1px rgba(255,255,255,0.7),
       inset 0 2px 6px rgba(0,0,0,0.05);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
+    /* Subtle ruled-paper effect — horizontal lines like a notebook */
+    background-image:
+      linear-gradient(to bottom,
+        rgba(255,255,255,0) 0,
+        rgba(255,255,255,0) calc(1.5em - 1px),
+        rgba(100, 120, 180, 0.18) calc(1.5em - 1px),
+        rgba(100, 120, 180, 0.18) 1.5em,
+        rgba(255,255,255,0) 1.5em);
+    background-size: 100% 1.5em;
+    background-position: 0 0.4em;
+    background-repeat: repeat-y;
   }
   .blessing-area::placeholder {
     color: rgba(40, 50, 80, 0.45);
@@ -895,7 +912,6 @@
         <div class="card-face card-back" id="cardBack">
           <div class="back-bg" id="backBg"></div>
           <div class="back-content">
-            <h3 class="back-title">✍️ ברכה אישית</h3>
             <textarea
               class="blessing-area"
               id="blessingArea"
