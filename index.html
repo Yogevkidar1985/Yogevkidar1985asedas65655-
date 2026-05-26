@@ -79,10 +79,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 5px;
     position: relative;
     z-index: 2;
-    padding-bottom: 2px;
+    padding-bottom: 0;
   }
 
   /* Footer credit centered at the bottom of the page */
@@ -310,7 +310,7 @@
   /* Casino-style "scratch again" button — pulsing gold with shimmer */
   .reset-btn {
     position: relative;
-    margin-top: 6px;
+    margin-top: 0;
     border: none;
     color: #3a1500;
     font-family: inherit;
@@ -414,12 +414,12 @@
      Card max-width tightens further so the 3:4 height never exceeds
      what the viewport can show. */
   @media (max-height: 820px) {
-    .wrap { gap: 7px; padding-bottom: 0; }
+    .wrap { gap: 4px; padding-bottom: 0; }
     .title-wrap { padding: 8px 20px 6px; }
     h1.title { font-size: clamp(28px, 7.5vw, 42px); }
-    .subtitle { font-size: 15px; margin-top: 4px; padding: 1px 4px; }
+    .subtitle { font-size: 15px; margin-top: 3px; padding: 1px 4px; }
     .reset-btn { padding: 10px 22px; font-size: 15px; }
-    .page-footer { padding: 4px 0 0; }
+    .page-footer { padding: 2px 0 0; }
     .page-footer img { height: 30px; }
     .page-footer .credit { font-size: 12px; }
   }
@@ -632,8 +632,8 @@
   }
   .flip-hint.visible {
     max-height: 60px;
-    padding: 8px 18px;
-    margin: 4px 0 -2px;
+    padding: 7px 18px;
+    margin: -2px 0 -4px;
     opacity: 1;
     animation: flipHintBob 1.6s ease-in-out infinite;
   }
