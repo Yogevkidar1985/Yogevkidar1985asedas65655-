@@ -256,24 +256,97 @@
   }
   .progress-pill.hidden { opacity: 0; }
 
+  /* Casino-style "scratch again" button — pulsing gold with shimmer */
   .reset-btn {
-    margin-top: 4px;
+    position: relative;
+    margin-top: 6px;
     border: none;
-    background: linear-gradient(90deg, #ff8fb5, #8fb5ff);
-    color: white;
+    color: #3a1500;
     font-family: inherit;
-    font-weight: 700;
-    font-size: 15px;
-    padding: 12px 22px;
+    font-weight: 900;
+    font-size: 17px;
+    letter-spacing: 0.3px;
+    padding: 14px 30px;
     border-radius: 999px;
     cursor: pointer;
-    box-shadow: 0 8px 18px -8px rgba(80, 60, 120, 0.45);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.3s ease;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+      linear-gradient(180deg,
+        #fff3a3 0%,
+        #ffd24a 30%,
+        #c98c17 55%,
+        #ffcc3e 80%,
+        #fff0a8 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -2px 0 rgba(120, 60, 0, 0.4),
+      0 0 0 3px #b8731a,
+      0 0 0 5px #ffd966,
+      0 0 0 7px #b8731a,
+      0 8px 22px -6px rgba(255, 170, 50, 0.7),
+      0 0 24px rgba(255, 200, 80, 0.6);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: transform 0.18s ease, opacity 0.3s ease, filter 0.2s ease;
     opacity: 0;
     pointer-events: none;
+    animation: jackpotPulse 1.6s ease-in-out infinite;
   }
   .reset-btn.visible { opacity: 1; pointer-events: auto; }
-  .reset-btn:active { transform: scale(0.96); }
+
+  /* Shimmer sweep across the button */
+  .reset-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(110deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(255, 255, 255, 0.85) 50%,
+      rgba(255, 255, 255, 0) 80%,
+      transparent 100%);
+    transform: skewX(-20deg);
+    animation: shimmerSweep 2.2s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Outer glow halo that breathes */
+  .reset-btn::after {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    border-radius: 999px;
+    background: radial-gradient(ellipse at center,
+      rgba(255, 215, 80, 0.55) 0%,
+      rgba(255, 170, 40, 0.25) 35%,
+      transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+    animation: haloBreathe 1.6s ease-in-out infinite;
+  }
+
+  .reset-btn:hover {
+    filter: brightness(1.08) saturate(1.15);
+    transform: translateY(-1px) scale(1.03);
+  }
+  .reset-btn:active { transform: scale(0.95); }
+
+  @keyframes jackpotPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.045); }
+  }
+  @keyframes shimmerSweep {
+    0% { left: -60%; }
+    60%, 100% { left: 120%; }
+  }
+  @keyframes haloBreathe {
+    0%, 100% { opacity: 0.65; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+  }
 
   /* Confetti canvas covers full viewport */
   .confetti-canvas {
@@ -307,7 +380,7 @@
     <div class="reveal" id="reveal">
       <span class="badge">מזל טוב!</span>
       <div class="photo" id="photo" aria-label="תמונת הפתעה"></div>
-      <h2>נולד לנו בן! 💙</h2>
+      <h2>יש לנו בן! 💙</h2>
       <p>בשעה טובה ומוצלחת — שיגדל לתורה, לחופה ולמעשים טובים</p>
     </div>
 
@@ -322,7 +395,7 @@
     <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
   </div>
 
-  <button class="reset-btn" id="resetBtn" type="button">גירוד נוסף 🎉</button>
+  <button class="reset-btn" id="resetBtn" type="button">🎰 גירוד נוסף 🎰</button>
 </div>
 
 <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
