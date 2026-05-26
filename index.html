@@ -297,11 +297,13 @@
   'use strict';
 
   // ============================================================
-  // CONFIG — to swap the hidden image, set IMAGE_URL below
-  // (use any direct image URL — jpg / png / webp)
-  // Leave as null to use the default Unsplash baby photo.
+  // CONFIG
+  //   IMAGE_URL          — the hidden surprise photo (behind scratch)
+  //   SCRATCH_IMAGE_URL  — the scratch card surface itself (Chishgad)
+  // Set to null to fall back to the built-in drawing.
   // ============================================================
   const IMAGE_URL = null;
+  const SCRATCH_IMAGE_URL = 'IMG_5133.jpeg';
 
   if (IMAGE_URL) {
     document.documentElement.style.setProperty('--reveal-image', `url("${IMAGE_URL}")`);
@@ -318,6 +320,40 @@
   let revealed = false;
   let lastPoint = null;
   let dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  // Preload the scratch-surface image so we can paint it onto the canvas
+  let scratchImage = null;
+  let scratchImageReady = false;
+  if (SCRATCH_IMAGE_URL) {
+    scratchImage = new Image();
+    scratchImage.onload = () => {
+      scratchImageReady = true;
+      if (!revealed) paintScratchSurface();
+    };
+    scratchImage.onerror = () => {
+      scratchImageReady = false;
+    };
+    scratchImage.src = SCRATCH_IMAGE_URL;
+  }
+
+  // Draw an image with "object-fit: cover" semantics into the given rectangle
+  function drawImageCover(img, dx, dy, dw, dh) {
+    const ir = img.naturalWidth / img.naturalHeight;
+    const br = dw / dh;
+    let sx, sy, sw, sh;
+    if (ir > br) {
+      sh = img.naturalHeight;
+      sw = sh * br;
+      sx = (img.naturalWidth - sw) / 2;
+      sy = 0;
+    } else {
+      sw = img.naturalWidth;
+      sh = sw / br;
+      sx = 0;
+      sy = (img.naturalHeight - sh) / 2;
+    }
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+  }
 
   // Seeded pseudo-random so the money pattern looks the same every paint
   function seededRand(seed) {
@@ -357,6 +393,13 @@
     const H = canvas.height;
     ctx.globalCompositeOperation = 'source-over';
 
+    // If the real scratch image is loaded, just draw it and we're done.
+    if (scratchImageReady && scratchImage) {
+      drawImageCover(scratchImage, 0, 0, W, H);
+      return;
+    }
+
+    // ---- Fallback: programmatic Chishgad-style design ----
     // ---- 1. Pink/peach base background (like the Chishgad card) ----
     const bg = ctx.createLinearGradient(0, 0, W, H);
     bg.addColorStop(0, '#f7b8c8');
