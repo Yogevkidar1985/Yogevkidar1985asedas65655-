@@ -917,7 +917,7 @@
               id="blessingArea"
               dir="rtl"
               maxlength="500"
-              placeholder="כתבו כאן ברכה אישית להולדת הבן..."></textarea>
+              placeholder="לכתיבת ברכה"></textarea>
             <div class="back-controls">
               <span class="save-indicator" id="saveIndicator">נשמר ✓</span>
               <button class="share-btn" id="shareBtn" type="button"><span class="dice" aria-hidden="true">🎲</span> שיתוף הברכה</button>
@@ -1810,6 +1810,16 @@
 
   // Load from URL hash (if shared) OR from local storage
   function loadInitialState() {
+    // One-time wipe of previously saved demo blessing — bumping this
+    // version cleans out any stale text from earlier test sessions
+    const STORAGE_VERSION = 'v2';
+    try {
+      if (localStorage.getItem('blessingVersion') !== STORAGE_VERSION) {
+        localStorage.removeItem('blessingText');
+        localStorage.setItem('blessingVersion', STORAGE_VERSION);
+      }
+    } catch (e) {}
+
     let loadedFromUrl = false;
     if (location.hash && location.hash.length > 1) {
       const params = new URLSearchParams(location.hash.substring(1));
