@@ -58,10 +58,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 10px;
     position: relative;
     z-index: 2;
-    padding-bottom: 8px;
+    padding-bottom: 4px;
   }
 
   /* Footer credit centered at the bottom of the page */
@@ -534,7 +534,7 @@
     /* Cap the card by viewport height too — the card is 3:4 portrait,
        so limiting its WIDTH by a fraction of dvh keeps the HEIGHT
        within bounds even on short phones */
-    max-width: min(420px, 46dvh);
+    max-width: min(440px, 52dvh);
     width: 100%;
     perspective: 1500px;
     background: transparent;
@@ -831,54 +831,76 @@
   }
 
   /* =============================================================
-     Roulette ticker below the card — transparent, no white strip
+     Casino-style scrolling roulette: deep bordeaux felt, animated
+     gold-bulb border, and glowing cream text — clearly visible
      ============================================================= */
   .roulette {
     width: 100%;
     max-width: 460px;
     overflow: hidden;
-    background: transparent;
+    background:
+      radial-gradient(ellipse at center, #8e1818 0%, #5a0e0e 100%);
     border-radius: 14px;
-    padding: 8px 0;
+    padding: 11px 0;
     position: relative;
     margin-top: 2px;
+    box-shadow:
+      inset 0 0 18px rgba(255, 215, 0, 0.25),
+      inset 0 0 0 3px #ffd700,
+      inset 0 0 0 4px #8c5e08,
+      0 6px 18px -4px rgba(0, 0, 0, 0.4),
+      0 0 18px rgba(255, 175, 30, 0.45);
   }
+  /* Running gold bulbs along the top + bottom border */
   .roulette::before,
   .roulette::after {
     content: '';
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 30px;
+    left: 6px;
+    right: 6px;
+    height: 6px;
+    background-image:
+      radial-gradient(circle, #fff5a8 1.5px, rgba(255, 215, 0, 0.8) 2.5px, transparent 3.5px);
+    background-size: 12px 6px;
+    background-repeat: repeat-x;
+    background-position: 0 50%;
+    animation: bulbRun 0.9s linear infinite;
     z-index: 2;
     pointer-events: none;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8));
   }
-  /* Soft fade to the page background instead of solid white */
-  .roulette::before { left: 0;
-    background: linear-gradient(90deg, rgba(244,247,253,1) 0%, rgba(244,247,253,0) 100%); }
-  .roulette::after  { right: 0;
-    background: linear-gradient(-90deg, rgba(244,247,253,1) 0%, rgba(244,247,253,0) 100%); }
+  .roulette::before { top: 4px; }
+  .roulette::after  { bottom: 4px; animation-direction: reverse; }
+  @keyframes bulbRun {
+    to { background-position: 12px 50%; }
+  }
 
   .roulette-track {
     display: flex;
-    gap: 26px;
+    gap: 28px;
     white-space: nowrap;
     width: max-content;
-    animation: rouletteScroll 32s linear infinite;
+    animation: rouletteScroll 22s linear infinite;
     align-items: center;
-    padding: 0 12px;
+    padding: 4px 14px;
   }
   .roulette-track span {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-family: 'Heebo', sans-serif;
-    font-weight: 700;
-    font-size: clamp(15px, 4.2vw, 18px);
-    color: #2b3a55;
+    font-weight: 900;
+    font-size: clamp(16px, 4.4vw, 19px);
+    color: #fff5d6;
+    text-shadow:
+      0 0 6px rgba(255, 215, 0, 0.9),
+      0 0 12px rgba(255, 175, 50, 0.6),
+      0 1px 2px rgba(0, 0, 0, 0.55);
+    letter-spacing: 0.3px;
   }
   .roulette-track .emoji {
-    font-size: clamp(20px, 5.5vw, 24px);
+    font-size: clamp(20px, 5.4vw, 24px);
+    filter: drop-shadow(0 0 4px rgba(255, 220, 100, 0.55));
   }
   @keyframes rouletteScroll {
     0%   { transform: translateX(0); }
@@ -982,11 +1004,11 @@
   // ============================================================
   // CONFIG
   //   IMAGE_URL          — the hidden surprise photo (behind scratch)
-  //   SCRATCH_IMAGE_URL  — the scratch card surface itself (Chishgad)
-  // Set to null to fall back to the built-in drawing.
+  //   SCRATCH_IMAGE_URLS — list of scratch card surfaces; cycles each
+  //                        time the user presses "scratch again"
   // ============================================================
   const IMAGE_URL = null;
-  const SCRATCH_IMAGE_URL = 'IMG_5133.jpeg';
+  const SCRATCH_IMAGE_URLS = ['IMG_5133.jpeg', 'IMG_5143.jpeg'];
 
   if (IMAGE_URL) {
     document.documentElement.style.setProperty('--reveal-image', `url("${IMAGE_URL}")`);
@@ -1004,20 +1026,36 @@
   let lastPoint = null;
   let dpr = Math.max(1, window.devicePixelRatio || 1);
 
-  // Preload the scratch-surface image so we can paint it onto the canvas
+  // Preload all scratch-surface images so we can paint any of them onto
+  // the canvas. The current one cycles via resetCard().
   let scratchImage = null;
   let scratchImageReady = false;
-  if (SCRATCH_IMAGE_URL) {
-    scratchImage = new Image();
-    scratchImage.onload = () => {
+  let currentImageIndex = 0;
+  const scratchImagePool = SCRATCH_IMAGE_URLS.map((url, i) => {
+    const img = new Image();
+    img.onload = () => {
+      if (i === currentImageIndex) {
+        scratchImage = img;
+        scratchImageReady = true;
+        if (!revealed) paintScratchSurface();
+      }
+    };
+    img.src = url;
+    return img;
+  });
+  function setScratchImage(index) {
+    currentImageIndex = index % scratchImagePool.length;
+    const img = scratchImagePool[currentImageIndex];
+    if (img && img.complete && img.naturalWidth > 0) {
+      scratchImage = img;
       scratchImageReady = true;
-      if (!revealed) paintScratchSurface();
-    };
-    scratchImage.onerror = () => {
+    } else {
+      scratchImage = null;
       scratchImageReady = false;
-    };
-    scratchImage.src = SCRATCH_IMAGE_URL;
+    }
   }
+  // Initial state — pick first image if already cached
+  setScratchImage(0);
 
   // Draw an image with "object-fit: cover" semantics into the given rectangle.
   // Also trims ~3.5% from each side, which crops out the gray margin baked
@@ -1475,6 +1513,9 @@
     if (cardShell.classList.contains('flipped')) {
       flipToFront();
     }
+    // Cycle to the next scratch image so each "scratch again" reveals a
+    // different Chishgad card
+    setScratchImage(currentImageIndex + 1);
     revealed = false;
     scratchStartTime = null;
     canvas.classList.remove('gone');
